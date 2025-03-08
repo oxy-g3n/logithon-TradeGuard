@@ -211,12 +211,6 @@ const quickActionIcons = {
     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
     </svg>
-  ),
-  manageRules: (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    </svg>
   )
 };
 
@@ -469,9 +463,9 @@ export default function Dashboard() {
         </header>
 
         {/* Dashboard Content */}
-        <main className="p-6 space-y-6">
+        <main className="p-6 space-y-6 bg-white max-w-[1920px] mx-auto">
           {/* Summary Statistics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 lg:gap-6">
             <StatCard 
               title="Total Shipments" 
               value={stats.totalShipments} 
@@ -505,38 +499,46 @@ export default function Dashboard() {
               trend="+1.2%"
               trendDirection="up"
             />
-            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Risk Score</h3>
-              <div className="flex-1 flex items-center justify-center">
-                <div className="relative w-full">
-                  <div className="relative w-full h-4 bg-gray-200 rounded-full overflow-hidden">
+            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 sm:col-span-2 lg:col-span-1">
+              <h3 className="text-sm font-medium text-gray-500 mb-3">Risk Score</h3>
+              <div className="flex-1 flex flex-col justify-center">
+                <div className="relative w-full mb-4">
+                  <div className="relative w-full h-3 bg-gray-200 rounded-full overflow-hidden">
                     <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 w-full"></div>
                     <div className="absolute top-0 left-0 h-full flex items-center" style={{ left: `${stats.complianceRate}%` }}>
-                      <div className="h-6 w-6 rounded-full bg-white border-2 border-gray-300 shadow-lg transform -translate-x-1/2 transition-all duration-300"></div>
+                      <div className="h-5 w-5 rounded-full bg-white border-2 border-gray-300 shadow-lg transform -translate-x-1/2 transition-all duration-300"></div>
                     </div>
                   </div>
-                  <div className="mt-4 text-center">
-                    <span className="text-2xl font-bold text-gray-700">{stats.complianceRate}%</span>
-                    <p className="text-sm text-gray-500">Overall Compliance</p>
-                  </div>
+                </div>
+                <div className="text-center">
+                  <span className="text-2xl font-bold text-gray-700">{stats.complianceRate}%</span>
+                  <p className="text-sm text-gray-500">Overall Compliance</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Charts Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Shipment Trends Chart */}
-            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 min-h-[400px]">
               <div className="flex justify-between items-center mb-6">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-800">Shipment Trends</h2>
                   <p className="text-sm text-gray-500">Monthly shipment volume and compliance status</p>
                 </div>
-                <select className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-gray-50">
-                  <option>Last 12 Months</option>
-                  <option>Last 6 Months</option>
-                  <option>Last 3 Months</option>
+                <select 
+                  className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white hover:border-[#1E40AF]/20 focus:outline-none focus:ring-2 focus:ring-[#FF6B00]/50 focus:border-[#FF6B00] cursor-pointer appearance-none pr-8 relative"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 0.5rem center',
+                    backgroundSize: '1.5em 1.5em'
+                  }}
+                >
+                  <option className="py-2 px-3 text-gray-800 hover:bg-gray-100">Last 12 Months</option>
+                  <option className="py-2 px-3 text-gray-800 hover:bg-gray-100">Last 6 Months</option>
+                  <option className="py-2 px-3 text-gray-800 hover:bg-gray-100">Last 3 Months</option>
                 </select>
               </div>
               <div className="h-80">
@@ -598,7 +600,7 @@ export default function Dashboard() {
             </div>
 
             {/* Risk Distribution Chart */}
-            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 min-h-[400px]">
               <div className="flex justify-between items-center mb-6">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-800">Risk Distribution</h2>
@@ -653,7 +655,7 @@ export default function Dashboard() {
           </div>
 
           {/* Compliance Metrics Chart */}
-          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-6">
+          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-6 min-h-[400px]">
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h2 className="text-lg font-semibold text-gray-800">Compliance Metrics</h2>
@@ -716,7 +718,7 @@ export default function Dashboard() {
           </div>
 
           {/* Grid section after Compliance Metrics */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 bg-white">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Recent Shipments Table */}
             <div className="lg:col-span-2 bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
               <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-[#1E40AF]/5 via-[#1E40AF]/2 to-transparent">
@@ -808,11 +810,11 @@ export default function Dashboard() {
             </div>
 
             {/* Right Side Panels */}
-            <div className="space-y-6 bg-white">
+            <div className="space-y-6">
               {/* Quick Actions Panel */}
               <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
                 <h2 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <QuickActionButton 
                     icon={quickActionIcons.newShipment}
                     text="New Shipment" 
@@ -827,11 +829,6 @@ export default function Dashboard() {
                     icon={quickActionIcons.generateReport}
                     text="Generate Report" 
                     onClick={() => console.log('Generate report')} 
-                  />
-                  <QuickActionButton 
-                    icon={quickActionIcons.manageRules}
-                    text="Manage Rules" 
-                    onClick={() => console.log('Manage rules')} 
                   />
                 </div>
               </div>
@@ -921,21 +918,10 @@ export default function Dashboard() {
 // Updated StatCard component
 function StatCard({ title, value, icon, color, percentage, trend, trendDirection }: StatCardProps) {
   return (
-    <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 transform hover:scale-[1.02] transition-all duration-300">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <div className={`${color} h-12 w-12 rounded-xl flex items-center justify-center text-white shadow-lg`}>
-            {icon}
-          </div>
-          <div className="ml-4">
-            <h3 className="text-sm font-medium text-gray-500">{title}</h3>
-            <div className="flex items-baseline">
-              <p className="text-2xl font-semibold text-gray-900">{value.toLocaleString()}</p>
-              {percentage && (
-                <p className="ml-2 text-sm text-green-600 font-medium">{percentage}</p>
-              )}
-            </div>
-          </div>
+    <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 transform hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between h-full">
+      <div className="flex items-start justify-between mb-4">
+        <div className={`${color} h-12 w-12 rounded-xl flex items-center justify-center text-white shadow-lg`}>
+          {icon}
         </div>
         {trend && (
           <div className={`flex items-center ${trendDirection === 'up' ? 'text-green-600' : 'text-red-600'}`}>
@@ -951,6 +937,15 @@ function StatCard({ title, value, icon, color, percentage, trend, trendDirection
           </div>
         )}
       </div>
+      <div>
+        <h3 className="text-sm font-medium text-gray-500 mb-1">{title}</h3>
+        <div className="flex items-baseline">
+          <p className="text-2xl font-semibold text-gray-900">{value.toLocaleString()}</p>
+          {percentage && (
+            <p className="ml-2 text-sm text-green-600 font-medium">{percentage}</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -960,12 +955,12 @@ function QuickActionButton({ icon, text, onClick }: QuickActionButtonProps) {
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center justify-center p-4 bg-white hover:bg-gray-50 rounded-xl transition-all duration-200 border border-gray-100 hover:border-[#1E40AF]/20 group"
+      className="flex flex-col items-center justify-center p-4 bg-white hover:bg-gray-50 rounded-xl transition-all duration-200 border border-gray-100 hover:border-[#1E40AF]/20 group w-full"
     >
       <div className="text-gray-400 group-hover:text-[#1E40AF] mb-2 transform group-hover:scale-110 transition-all duration-200">
         {icon}
       </div>
-      <span className="text-sm text-gray-700 font-medium group-hover:text-[#1E40AF]">{text}</span>
+      <span className="text-sm text-gray-700 font-medium group-hover:text-[#1E40AF] whitespace-nowrap">{text}</span>
     </button>
   );
 } 

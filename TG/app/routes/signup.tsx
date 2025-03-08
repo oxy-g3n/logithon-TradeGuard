@@ -212,7 +212,7 @@ export default function SignUpPage() {
                       value={formData.firstName}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent text-gray-900 placeholder-gray-500"
                     />
                   </div>
                   <div>
@@ -223,7 +223,7 @@ export default function SignUpPage() {
                       value={formData.lastName}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent text-gray-900 placeholder-gray-500"
                     />
                   </div>
                 </div>
@@ -235,7 +235,7 @@ export default function SignUpPage() {
                     value={formData.email}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent text-gray-900 placeholder-gray-500"
                     placeholder="your.email@company.com"
                   />
                 </div>
@@ -247,7 +247,7 @@ export default function SignUpPage() {
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent text-gray-900 placeholder-gray-500"
                     placeholder="+1 (555) 123-4567"
                   />
                 </div>
@@ -259,7 +259,7 @@ export default function SignUpPage() {
                     value={formData.companyName}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent text-gray-900 placeholder-gray-500"
                     placeholder="Your Company Ltd."
                   />
                 </div>
@@ -318,7 +318,7 @@ export default function SignUpPage() {
                     name="businessRegNumber"
                     value={formData.businessRegNumber}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent text-gray-900 placeholder-gray-500"
                     placeholder="Optional"
                   />
                   <p className="mt-1 text-sm text-gray-500">
@@ -333,7 +333,7 @@ export default function SignUpPage() {
                     value={formData.primaryCountry}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent text-gray-900 placeholder-gray-500"
                     placeholder="e.g., United States"
                   />
                 </div>
@@ -373,7 +373,7 @@ export default function SignUpPage() {
                     required
                     pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
                     title="Minimum 8 characters, including uppercase, lowercase, number, and special character"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent text-gray-900"
                   />
                   <p className="mt-1 text-sm text-gray-500">
                     Must contain at least 8 characters, including uppercase, lowercase, number, and special character
@@ -387,7 +387,7 @@ export default function SignUpPage() {
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B00] focus:border-transparent text-gray-900"
                   />
                 </div>
                 <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
