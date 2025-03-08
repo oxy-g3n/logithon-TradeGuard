@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import type { CSSProperties } from 'react';
+import { registerUser } from '../utils/api';
 
 type NotificationPreference = 'email' | 'sms' | 'in-app';
 type CompanyType = 'sme' | 'logistics' | 'freight' | 'customs';
-type UserRole = 'exporter' | 'compliance' | 'admin';
+type UserRole = 'exporter' | 'compliance';
 
 export default function SignUpPage() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -66,12 +67,37 @@ export default function SignUpPage() {
     setIsLoading(true);
     setError('');
 
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      // TODO: Implement actual registration logic here
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      window.location.href = '/dashboard';
-    } catch (err) {
-      setError('Registration failed. Please try again.');
+      // Call the registration API
+      const response = await registerUser({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        companyName: formData.companyName,
+        userRole: formData.userRole,
+        companyType: formData.companyType,
+        regNumber: formData.businessRegNumber,
+        primaryCountry: formData.primaryCountry,
+        shippingVolume: formData.shippingVolume,
+        password: formData.password,
+      });
+      
+      if (response.success) {
+        // Redirect to login page after successful registration
+        window.location.href = '/login';
+      } else {
+        setError(response.message || 'Registration failed. Please try again.');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -257,7 +283,6 @@ export default function SignUpPage() {
                     <option value="" className="text-gray-700">Select a role</option>
                     <option value="exporter" className="text-gray-700">Exporter</option>
                     <option value="compliance" className="text-gray-700">Compliance Officer</option>
-                    <option value="admin" className="text-gray-700">Admin</option>
                   </select>
                   <p className="mt-1 text-sm text-gray-500">
                     This determines your access level and dashboard view

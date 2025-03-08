@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { loginUser } from '../utils/api';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -13,11 +14,20 @@ export default function LoginPage() {
     setError('');
 
     try {
-      // TODO: Implement actual authentication logic here
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
-      window.location.href = '/dashboard';
-    } catch (err) {
-      setError('Invalid email or password. Please try again.');
+      // Call the login API
+      const response = await loginUser(email, password);
+      
+      if (response.success) {
+        // If remember me is checked, we could implement persistent storage here
+        // For now, we're using sessionStorage in the API utility
+        
+        // Redirect to dashboard
+        window.location.href = '/dashboard';
+      } else {
+        setError(response.message || 'Login failed. Please try again.');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Invalid email or password. Please try again.');
     } finally {
       setIsLoading(false);
     }
