@@ -11,10 +11,12 @@
   "dependencies": {
     "@react-router/node": "^7.3.0",
     "@react-router/serve": "^7.3.0",
+    "@types/recharts": "^1.8.29",
     "isbot": "^5.1.17",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router": "^7.3.0"
+    "react-router": "^7.3.0",
+    "recharts": "^2.15.1"
   },
   "devDependencies": {
     "@react-router/dev": "^7.3.0",
