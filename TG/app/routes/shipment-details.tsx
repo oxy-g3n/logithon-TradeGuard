@@ -41,11 +41,35 @@ interface ShipmentFormData {
   // Documentation
   commercialInvoice: File | null;
   packingList: File | null;
+
+  // New field
+  useHsCode: boolean;
 }
+
+const AVAILABLE_COUNTRIES = [
+  { code: 'IN', name: 'India' },
+  { code: 'EU', name: 'Europe' },
+  { code: 'UK', name: 'United Kingdom' },
+  { code: 'US', name: 'United States' }
+] as const;
+
+const generateShipmentId = (originCountry: string, destinationCountry: string, date: string): string => {
+  if (!originCountry || !destinationCountry || !date) return '';
+  
+  // Generate a random 4-digit number
+  const randomNum = Math.floor(1000 + Math.random() * 9000);
+  
+  // Format the date to YYMMDD
+  const formattedDate = date.split('-').join('').substring(2);
+  
+  // Combine all parts: Origin-Destination-YYMMDD-RandomNumber
+  return `${originCountry}-${destinationCountry}-${formattedDate}-${randomNum}`;
+};
 
 export default function ShipmentDetailsPage() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
+  const [countryError, setCountryError] = useState('');
   const [formData, setFormData] = useState<ShipmentFormData>({
     exporterName: '',
     exporterAddress: '',
@@ -74,11 +98,41 @@ export default function ShipmentDetailsPage() {
     mainCategory: '',
     subCategory: '',
     commercialInvoice: null,
-    packingList: null
+    packingList: null,
+    useHsCode: true,
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    
+    // Special handling for country selection and date
+    if (name === 'originCountry' || name === 'destinationCountry' || name === 'shipmentDate') {
+      let newFormData = { ...formData, [name]: value };
+      
+      // Generate shipment ID if we have both countries and date
+      if (newFormData.originCountry && newFormData.destinationCountry && newFormData.shipmentDate) {
+        newFormData.shipmentId = generateShipmentId(
+          newFormData.originCountry,
+          newFormData.destinationCountry,
+          newFormData.shipmentDate
+        );
+      }
+
+      // Handle country validation
+      if (name === 'originCountry' || name === 'destinationCountry') {
+        const otherCountry = name === 'originCountry' ? newFormData.destinationCountry : newFormData.originCountry;
+        
+        if (value === otherCountry && value !== '') {
+          setCountryError('Origin and destination countries cannot be the same');
+          return;
+        }
+        setCountryError('');
+      }
+
+      setFormData(newFormData);
+      return;
+    }
+
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       const parentKey = parent as keyof ShipmentFormData;
@@ -271,13 +325,35 @@ export default function ShipmentDetailsPage() {
                         required
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E293B]">Country</label>
+                      <select
+                        name="originCountry"
+                        value={formData.originCountry}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] bg-white
+                          focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20"
+                        required
+                      >
+                        <option value="">Select Country</option>
+                        {AVAILABLE_COUNTRIES.map(country => (
+                          <option 
+                            key={country.code} 
+                            value={country.code}
+                            disabled={country.code === formData.destinationCountry}
+                          >
+                            {country.name} {country.code === formData.destinationCountry ? '(Selected as Destination)' : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
-                  {/* Consignee Details */}
+                  {/* Receiver Details */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-[#1E293B]">Consignee Details</h3>
+                    <h3 className="text-lg font-semibold text-[#1E293B]">Receiver Details</h3>
                     <div>
-                      <label className="block text-sm font-medium text-[#1E293B]">Consignee Name</label>
+                      <label className="block text-sm font-medium text-[#1E293B]">Receiver Name</label>
                       <input
                         type="text"
                         name="consigneeName"
@@ -324,6 +400,28 @@ export default function ShipmentDetailsPage() {
                         required
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E293B]">Country</label>
+                      <select
+                        name="destinationCountry"
+                        value={formData.destinationCountry}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] bg-white
+                          focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20"
+                        required
+                      >
+                        <option value="">Select Country</option>
+                        {AVAILABLE_COUNTRIES.map(country => (
+                          <option 
+                            key={country.code} 
+                            value={country.code}
+                            disabled={country.code === formData.originCountry}
+                          >
+                            {country.name} {country.code === formData.originCountry ? '(Selected as Origin)' : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 </div>
               )}
@@ -333,15 +431,22 @@ export default function ShipmentDetailsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-[#1E293B]">Shipment ID</label>
-                    <input
-                      type="text"
-                      name="shipmentId"
-                      value={formData.shipmentId}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                        focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                      required
-                    />
+                    <div className="mt-1 relative">
+                      <input
+                        type="text"
+                        name="shipmentId"
+                        value={formData.shipmentId}
+                        className="block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] bg-[#F8FAFC]
+                          focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20"
+                        readOnly
+                      />
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                        <svg className="h-5 w-5 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <p className="mt-1 text-sm text-[#64748B]">Auto-generated based on countries and date</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-[#1E293B]">Shipment Date</label>
@@ -384,112 +489,148 @@ export default function ShipmentDetailsPage() {
 
               {/* Step 3: Product Details */}
               {currentStep === 3 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-[#1E293B]">Item Description</label>
-                    <textarea
-                      name="itemDescription"
-                      value={formData.itemDescription}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                        focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                      rows={3}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#1E293B]">HS Code</label>
-                    <input
-                      type="text"
-                      name="hsCode"
-                      value={formData.hsCode}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                        focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#1E293B]">Main Category</label>
-                    <select
-                      name="mainCategory"
-                      value={formData.mainCategory}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] bg-white
-                        focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20"
-                      required
+                <div className="space-y-6">
+                  <div className="flex items-center justify-end space-x-2">
+                    <span className={`text-sm ${formData.useHsCode ? 'text-[#64748B]' : 'text-[#1E293B] font-medium'}`}>
+                      Categories
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, useHsCode: !prev.useHsCode }))}
+                      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#1E40AF] focus:ring-offset-2 ${
+                        formData.useHsCode ? 'bg-[#1E40AF]' : 'bg-[#94A3B8]'
+                      }`}
                     >
-                      <option value="">Select Category</option>
-                      <option value="Electronics">Electronics</option>
-                      <option value="Textiles">Textiles</option>
-                      <option value="Chemicals">Chemicals</option>
-                      <option value="Food">Food</option>
-                      <option value="Machinery">Machinery</option>
-                    </select>
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                          formData.useHsCode ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                    <span className={`text-sm ${formData.useHsCode ? 'text-[#1E293B] font-medium' : 'text-[#64748B]'}`}>
+                      HS Code
+                    </span>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#1E293B]">Sub Category</label>
-                    <input
-                      type="text"
-                      name="subCategory"
-                      value={formData.subCategory}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                        focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#1E293B]">Quantity</label>
-                    <input
-                      type="number"
-                      name="quantity"
-                      value={formData.quantity}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                        focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#1E293B]">Item Weight (kg)</label>
-                    <input
-                      type="number"
-                      name="itemWeight"
-                      value={formData.itemWeight}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                        focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#1E293B]">Packaging Type</label>
-                    <select
-                      name="packagingType"
-                      value={formData.packagingType}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] bg-white
-                        focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20"
-                      required
-                    >
-                      <option value="">Select Type</option>
-                      <option value="Carton">Carton</option>
-                      <option value="Pallet">Pallet</option>
-                      <option value="Box">Box</option>
-                      <option value="Crate">Crate</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#1E293B]">Handling Instructions</label>
-                    <textarea
-                      name="handlingInstructions"
-                      value={formData.handlingInstructions}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                        focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                      rows={3}
-                    />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E293B]">Item Description</label>
+                      <textarea
+                        name="itemDescription"
+                        value={formData.itemDescription}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
+                          focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
+                        rows={3}
+                        required
+                      />
+                    </div>
+
+                    {formData.useHsCode ? (
+                      <div>
+                        <label className="block text-sm font-medium text-[#1E293B]">HS Code</label>
+                        <div className="mt-1 relative">
+                          <input
+                            type="text"
+                            name="hsCode"
+                            value={formData.hsCode}
+                            onChange={handleInputChange}
+                            className="block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
+                              focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
+                            required={formData.useHsCode}
+                            placeholder="Enter HS Code"
+                          />
+                          <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                            <svg className="h-5 w-5 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                        </div>
+                        <p className="mt-1 text-sm text-[#64748B]">Enter the Harmonized System (HS) code for your item</p>
+                      </div>
+                    ) : (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-[#1E293B]">Main Category</label>
+                          <input
+                            type="text"
+                            name="mainCategory"
+                            value={formData.mainCategory}
+                            onChange={handleInputChange}
+                            className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
+                              focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
+                            required={!formData.useHsCode}
+                            placeholder="Enter main category"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-[#1E293B]">Sub Category</label>
+                          <input
+                            type="text"
+                            name="subCategory"
+                            value={formData.subCategory}
+                            onChange={handleInputChange}
+                            className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
+                              focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
+                            required={!formData.useHsCode}
+                            placeholder="Enter sub category"
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E293B]">Quantity</label>
+                      <input
+                        type="number"
+                        name="quantity"
+                        value={formData.quantity}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
+                          focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E293B]">Item Weight (kg)</label>
+                      <input
+                        type="number"
+                        name="itemWeight"
+                        value={formData.itemWeight}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
+                          focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E293B]">Packaging Type</label>
+                      <select
+                        name="packagingType"
+                        value={formData.packagingType}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] bg-white
+                          focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20"
+                        required
+                      >
+                        <option value="">Select Type</option>
+                        <option value="Carton">Carton</option>
+                        <option value="Pallet">Pallet</option>
+                        <option value="Box">Box</option>
+                        <option value="Crate">Crate</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E293B]">Handling Instructions</label>
+                      <textarea
+                        name="handlingInstructions"
+                        value={formData.handlingInstructions}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
+                          focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
+                        rows={3}
+                      />
+                    </div>
                   </div>
                 </div>
               )}
@@ -512,22 +653,7 @@ export default function ShipmentDetailsPage() {
                         file:cursor-pointer"
                       required
                     />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#1E293B]">Packing List</label>
-                    <input
-                      type="file"
-                      name="packingList"
-                      onChange={handleFileChange}
-                      className="mt-1 block w-full text-[#64748B]
-                        file:mr-4 file:py-2 file:px-4
-                        file:rounded-md file:border-0
-                        file:text-sm file:font-semibold
-                        file:bg-[#1E40AF] file:text-white
-                        hover:file:bg-[#1E293B]
-                        file:cursor-pointer"
-                      required
-                    />
+                    <p className="mt-2 text-sm text-[#64748B]">Upload your commercial invoice document in PDF format</p>
                   </div>
                 </div>
               )}
@@ -607,4 +733,4 @@ export default function ShipmentDetailsPage() {
       </div>
     </div>
   );
-}
+} 

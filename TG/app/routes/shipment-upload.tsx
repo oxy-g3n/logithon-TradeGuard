@@ -76,13 +76,28 @@ export default function ShipmentUploadPage() {
     if (optionId === 'manual') {
       navigate('/shipment-details');
     } else {
-      fileInputRef.current?.click();
+      setTimeout(() => {
+        if (fileInputRef.current) {
+          fileInputRef.current.accept = optionId === 'csv' ? '.csv' : '.pdf';
+          fileInputRef.current.click();
+        }
+      }, 100);
     }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    const fileExtension = file.name.toLowerCase().split('.').pop();
+    if (uploadType === 'csv' && fileExtension !== 'csv') {
+      setError('Please upload a valid CSV file');
+      return;
+    }
+    if (uploadType === 'pdf' && fileExtension !== 'pdf') {
+      setError('Please upload a valid PDF file');
+      return;
+    }
 
     validateAndProcessFile(file);
   };
@@ -296,6 +311,15 @@ export default function ShipmentUploadPage() {
               ))}
             </div>
 
+            {/* Hidden File Input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept={uploadType === 'csv' ? '.csv' : uploadType === 'pdf' ? '.pdf' : ''}
+              className="hidden"
+            />
+
             {/* File Drop Zone */}
             <div 
               className={`mt-8 border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300
@@ -314,7 +338,7 @@ export default function ShipmentUploadPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
                 <p className="mt-4 text-sm text-[#64748B]">
-                  Drag and drop your file here, or{' '}
+                  Drag and drop your {uploadType === 'csv' ? 'CSV' : uploadType === 'pdf' ? 'PDF' : ''} file here, or{' '}
                   <button 
                     onClick={() => fileInputRef.current?.click()}
                     className="text-[#1E40AF] hover:text-[#1E293B] font-medium"
@@ -323,7 +347,7 @@ export default function ShipmentUploadPage() {
                   </button>
                 </p>
                 <p className="mt-2 text-xs text-[#94A3B8]">
-                  Supported formats: CSV, PDF (max. 10MB)
+                  Supported format: {uploadType === 'csv' ? 'CSV' : uploadType === 'pdf' ? 'PDF' : ''} (max. 10MB)
                 </p>
               </div>
             </div>
@@ -343,15 +367,6 @@ export default function ShipmentUploadPage() {
                 </div>
               </div>
             )}
-
-            {/* Hidden File Input */}
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept={uploadType === 'csv' ? '.csv' : '.pdf'}
-              className="hidden"
-            />
           </div>
 
           {/* Help Section */}
