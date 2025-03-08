@@ -581,29 +581,63 @@ export default function ShipmentDetailsPage() {
                     )}
 
                     <div>
-                      <label className="block text-sm font-medium text-[#1E293B]">Quantity</label>
-                      <input
-                        type="number"
-                        name="quantity"
-                        value={formData.quantity}
-                        onChange={handleInputChange}
-                        className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                          focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                        required
-                      />
+                      <label className="block text-sm font-medium text-[#1E293B]">Dimensions</label>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <div className="mt-1 relative">
+                            <input
+                              type="number"
+                              name="dimensions.length"
+                              value={formData.dimensions.length}
+                              onChange={handleInputChange}
+                              placeholder="Length"
+                              className="block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
+                                focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
+                              required
+                            />
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                              <span className="text-sm text-[#64748B]">cm</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="mt-1 relative">
+                            <input
+                              type="number"
+                              name="dimensions.width"
+                              value={formData.dimensions.width}
+                              onChange={handleInputChange}
+                              placeholder="Width"
+                              className="block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
+                                focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
+                              required
+                            />
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                              <span className="text-sm text-[#64748B]">cm</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="mt-1 relative">
+                            <input
+                              type="number"
+                              name="dimensions.height"
+                              value={formData.dimensions.height}
+                              onChange={handleInputChange}
+                              placeholder="Height"
+                              className="block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
+                                focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
+                              required
+                            />
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                              <span className="text-sm text-[#64748B]">cm</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="mt-1 text-sm text-[#64748B]">Enter dimensions in centimeters (Length × Width × Height)</p>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-[#1E293B]">Item Weight (kg)</label>
-                      <input
-                        type="number"
-                        name="itemWeight"
-                        value={formData.itemWeight}
-                        onChange={handleInputChange}
-                        className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                          focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                        required
-                      />
-                    </div>
+
                     <div>
                       <label className="block text-sm font-medium text-[#1E293B]">Packaging Type</label>
                       <select

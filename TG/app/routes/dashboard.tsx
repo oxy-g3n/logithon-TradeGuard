@@ -47,6 +47,14 @@ interface QuickActionButtonProps {
   onClick: () => void;
 }
 
+interface PendingCompliance {
+  id: string;
+  shipmentId: string;
+  status: 'Pending' | 'In Progress';
+  type: string;
+  date: string;
+}
+
 // Mock data for demonstration
 const mockShipments: Shipment[] = [
   { id: 'SH-2023-1001', destination: 'Germany', hsCode: '8471.30.0100', status: 'Compliant', riskLevel: 'Low', date: '2023-11-28' },
@@ -62,6 +70,14 @@ const mockNotifications: Notification[] = [
   { id: 2, type: 'update', message: 'New EU regulations affecting electronics exports', time: '2 hours ago' },
   { id: 3, type: 'alert', message: 'Shipment SH-2023-1005 flagged for sanctions violation', time: '3 hours ago' },
   { id: 4, type: 'system', message: 'System maintenance scheduled for Dec 5, 2023', time: '1 day ago' },
+];
+
+// Mock data for pending compliances
+const mockPendingCompliances: PendingCompliance[] = [
+  { id: 'PC-001', shipmentId: 'SH-2023-1002', status: 'Pending', type: 'Documentation Review', date: '2023-12-01' },
+  { id: 'PC-002', shipmentId: 'SH-2023-1003', status: 'In Progress', type: 'HS Code Verification', date: '2023-12-02' },
+  { id: 'PC-003', shipmentId: 'SH-2023-1005', status: 'Pending', type: 'Sanctions Check', date: '2023-12-02' },
+  { id: 'PC-004', shipmentId: 'SH-2023-1006', status: 'In Progress', type: 'License Validation', date: '2023-12-03' },
 ];
 
 // Enhanced mock data for charts
@@ -132,7 +148,7 @@ const sidebarItems = [
       </svg>
     ),
     text: 'Compliance',
-    id: 'compliance'
+    id: 'active-compliances'
   },
   {
     icon: (
@@ -221,6 +237,7 @@ export default function Dashboard() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
+  const [selectedCompliance, setSelectedCompliance] = useState<PendingCompliance | null>(null);
   const navigate = useNavigate();
 
   // Stats for summary cards
@@ -269,6 +286,7 @@ export default function Dashboard() {
           transition-all duration-300 ease-in-out
           border-r border-blue-800/20
           backdrop-blur-sm
+          flex flex-col
         `}
       >
         <div className="flex items-center justify-between p-4 border-b border-blue-800/30 backdrop-blur-sm">
@@ -298,7 +316,7 @@ export default function Dashboard() {
           </button>
         </div>
 
-        <nav className="mt-6 px-3">
+        <nav className="mt-6 px-3 flex-1 overflow-y-auto">
           {sidebarItems.map((item) => (
             <a
               key={item.id}
@@ -333,12 +351,50 @@ export default function Dashboard() {
               )}
             </a>
           ))}
+
+          {/* Pending Compliances Section */}
+          {sidebarOpen && (
+            <div className="mt-8">
+              <h3 className="px-4 text-sm font-semibold text-white/70 uppercase tracking-wider mb-3">
+                Pending Compliances
+              </h3>
+              <div className="space-y-2">
+                {mockPendingCompliances.map((compliance) => (
+                  <button
+                    key={compliance.id}
+                    onClick={() => {
+                      setSelectedCompliance(compliance);
+                      navigate(`/compliance-check/${compliance.shipmentId}`);
+                    }}
+                    className="w-full px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 
+                      transition-colors group text-left"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-white/90">
+                        {compliance.type}
+                      </span>
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        compliance.status === 'Pending' 
+                          ? 'bg-yellow-500/20 text-yellow-200'
+                          : 'bg-blue-500/20 text-blue-200'
+                      }`}>
+                        {compliance.status}
+                      </span>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between text-xs text-white/60">
+                      <span>{compliance.shipmentId}</span>
+                      <span>{compliance.date}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </nav>
 
-        {/* User Profile Section at Bottom */}
+        {/* User Profile Section */}
         <div className={`
-          absolute bottom-0 left-0 right-0 p-4
-          border-t border-blue-800/30 backdrop-blur-sm
+          p-4 border-t border-blue-800/30 backdrop-blur-sm
         `}>
           <button 
             onClick={toggleUserMenu}
