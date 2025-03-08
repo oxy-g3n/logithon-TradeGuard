@@ -6,6 +6,10 @@ export default [
     file: "routes/home.tsx"
   },
   {
+    path: "/signup",
+    file: "routes/signup.tsx"
+  },
+  {
     path: "/onboarding",
     file: "routes/onboarding.tsx"
   },
@@ -48,5 +52,9 @@ export default [
   {
     path: "/help",
     file: "routes/help.tsx"
+  },
+  {
+    path: "/forgot-password",
+    file: "routes/forgot-password.tsx"
   }
 ] satisfies RouteConfig;

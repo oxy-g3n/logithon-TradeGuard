@@ -15,8 +15,21 @@ export default function OnboardingPage() {
         
         <div className="relative max-w-6xl mx-auto px-4 pt-24 pb-32">
           <div className="text-center mb-16">
-            <h1 className="text-6xl font-bold text-[#FF6B00] mb-6">Welcome to TradeGaurd</h1>
-            <p className="text-2xl text-gray-700 mb-12 max-w-3xl mx-auto">Your Comprehensive Trade Compliance Solution</p>
+            <div className="flex flex-col items-center mb-8">
+              <img 
+                src="/logo.png" 
+                alt="TradeGuard Logo" 
+                className="w-40 h-40 object-contain mb-6"
+              />
+              <h1 className="text-6xl font-bold text-[#FF6B00] mb-6">TradeGuard</h1>
+            </div>
+            <p className="text-2xl text-gray-700 mb-12 max-w-3xl mx-auto">
+              AI-Powered Compliance Verification for Cross-Border Shipments
+            </p>
+            <p className="text-lg text-gray-600 mb-12 max-w-4xl mx-auto">
+              An intelligent compliance management system designed to help exporters, logistics companies, and small businesses 
+              automate shipment verification and ensure regulatory compliance before parcels are handed over to couriers.
+            </p>
             <a href="/login" className="inline-block bg-[#FF6B00] text-white px-8 py-4 rounded-lg hover:bg-[#E65100] transition-colors text-lg font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1">
               Get Started
             </a>
@@ -26,70 +39,103 @@ export default function OnboardingPage() {
 
       <div className="max-w-6xl mx-auto px-4 py-16">
         {/* Features Grid */}
-        <div className="grid md:grid-cols-3 gap-8 mb-24">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
           <FeatureCard
-            title="Smart Compliance Checks"
-            description="Automated validation against international trade regulations and standards"
-            icon="🔍"
+            title="Intelligent Data Ingestion"
+            description="Multiple data input methods including manual entry, bulk upload, API integrations with major couriers, and OCR scanning powered by Google Cloud Vision."
+            icon="📥"
             image="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=600&auto=format"
+            items={[
+              "Manual Entry Form",
+              "Bulk Upload (CSV/Excel)",
+              "Courier API Integrations",
+              "OCR Document Scanning"
+            ]}
           />
           <FeatureCard
-            title="Real-time Monitoring"
-            description="Stay updated with instant notifications on shipment status and compliance issues"
-            icon="📊"
+            title="Rule-Based Compliance"
+            description="Real-time validation engine ensuring shipments meet legal and regulatory standards across borders."
+            icon="✓"
             image="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=600&auto=format"
+            items={[
+              "Restricted Item Detection",
+              "HS Code Verification",
+              "Destination Regulations",
+              "AI-Powered Risk Analysis"
+            ]}
           />
           <FeatureCard
-            title="Document Management"
-            description="Centralized storage and management of all trade-related documents"
-            icon="📁"
+            title="Interactive Dashboard"
+            description="Intuitive, data-driven interface for real-time shipment monitoring and risk assessment."
+            icon="📊"
             image="https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?q=80&w=600&auto=format"
+            items={[
+              "Real-time Compliance Status",
+              "Risk Heatmaps",
+              "AI Fix Suggestions",
+              "Live Alerts & Notifications"
+            ]}
           />
         </div>
 
-        {/* Benefits Section with Side Image */}
+        {/* Advanced Features Section */}
         <div className="grid md:grid-cols-2 gap-12 items-center mb-24">
           <div className="relative rounded-2xl overflow-hidden h-[600px]">
             <img 
               src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1000&auto=format"
-              alt="Business professionals working" 
+              alt="AI-powered compliance" 
               className="absolute inset-0 w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-[#1E40AF] opacity-10"></div>
           </div>
           
           <div className="bg-gray-50 rounded-2xl p-8">
-            <h2 className="text-3xl font-bold text-[#FF6B00] mb-8">Why Choose TradeGaurd?</h2>
+            <div className="flex items-center mb-8">
+              <img 
+                src="/logo.png" 
+                alt="TradeGuard Logo" 
+                className="w-12 h-12 object-contain mr-4"
+              />
+              <h2 className="text-3xl font-bold text-[#FF6B00]">Advanced Compliance Features</h2>
+            </div>
             <div className="space-y-6">
               <BenefitItem
-                title="Risk Mitigation"
-                description="Reduce compliance risks with our advanced validation system"
+                title="Documentation & Reporting"
+                description="Auto-generated shipping forms, blockchain-based audit logs, and exportable compliance reports"
               />
               <BenefitItem
-                title="Time Efficiency"
-                description="Save hours on manual compliance checks and documentation"
+                title="AI-Powered Predictions"
+                description="Machine learning models to forecast regulatory issues and predict compliance risks"
               />
               <BenefitItem
-                title="Cost Reduction"
-                description="Minimize penalties and reduce operational costs"
+                title="Dynamic Rule Engine"
+                description="Configurable validation rules that adapt to changing regulations without code modifications"
               />
               <BenefitItem
-                title="Global Compliance"
-                description="Stay compliant with international trade regulations"
+                title="Secure Blockchain Tracking"
+                description="Tamper-proof compliance history using Ethereum/Hyperledger technology"
               />
             </div>
           </div>
         </div>
 
-        {/* Call to Action with Background Image */}
+        {/* Call to Action */}
         <div className="relative rounded-3xl overflow-hidden">
           <img 
             src="https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=2000&auto=format"
-            alt="Global business" 
+            alt="Global trade compliance" 
             className="absolute inset-0 w-full h-full object-cover opacity-20"
           />
           <div className="relative bg-gradient-to-r from-[#FF6B00]/90 to-[#1E40AF]/90 p-16 text-center">
-            <h2 className="text-4xl font-bold text-white mb-6">Ready to Transform Your Trade Operations?</h2>
+            <div className="flex justify-center mb-8">
+              <img 
+                src="/logo.png" 
+                alt="TradeGuard Logo" 
+                className="w-20 h-20 object-contain"
+              />
+            </div>
+            <h2 className="text-4xl font-bold text-white mb-6">Ready to Streamline Your Trade Compliance?</h2>
+            <p className="text-xl text-white mb-8">Join the future of automated compliance verification</p>
             <div className="space-x-4">
               <a href="/login" className="inline-block bg-white text-[#FF6B00] px-8 py-3 rounded-lg hover:bg-gray-100 transition-colors font-medium">
                 Start Now
@@ -105,7 +151,13 @@ export default function OnboardingPage() {
   );
 }
 
-function FeatureCard({ title, description, icon, image }: { title: string; description: string; icon: string; image: string }) {
+function FeatureCard({ title, description, icon, image, items }: { 
+  title: string; 
+  description: string; 
+  icon: string; 
+  image: string;
+  items: string[];
+}) {
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300">
       <div className="relative h-48 overflow-hidden">
@@ -119,7 +171,15 @@ function FeatureCard({ title, description, icon, image }: { title: string; descr
       </div>
       <div className="p-6">
         <h3 className="text-xl font-bold text-[#FF6B00] mb-2">{title}</h3>
-        <p className="text-gray-600">{description}</p>
+        <p className="text-gray-600 mb-4">{description}</p>
+        <ul className="space-y-2">
+          {items.map((item, index) => (
+            <li key={index} className="flex items-center text-gray-700">
+              <span className="text-[#1E40AF] mr-2">✔</span>
+              {item}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
