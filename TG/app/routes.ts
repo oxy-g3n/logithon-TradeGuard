@@ -22,7 +22,7 @@ export default [
     file: "routes/dashboard.tsx"
   },
   {
-    path: "/shipment-upload",
+    path: "/shipment-import",
     file: "routes/shipment-upload.tsx"
   },
   {

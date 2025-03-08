@@ -12,11 +12,15 @@
     "@react-router/node": "^7.3.0",
     "@react-router/serve": "^7.3.0",
     "@remix-run/node": "^2.16.0",
+    "@types/papaparse": "^5.3.15",
     "@types/recharts": "^1.8.29",
     "isbot": "^5.1.17",
+    "papaparse": "^5.5.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-dropzone": "^14.3.8",
     "react-router": "^7.3.0",
+    "react-router-dom": "^7.3.0",
     "recharts": "^2.15.1"
   },
   "devDependencies": {

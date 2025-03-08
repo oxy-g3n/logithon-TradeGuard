@@ -4,6 +4,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell
 } from 'recharts';
+import { useNavigate } from 'react-router-dom';
 
 interface Shipment {
   id: string;
@@ -118,11 +119,11 @@ const sidebarItems = [
   {
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
       </svg>
     ),
-    text: 'Shipments',
-    id: 'shipments'
+    text: 'Shipment Import',
+    id: 'shipment-import'
   },
   {
     icon: (
@@ -220,6 +221,7 @@ export default function Dashboard() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
+  const navigate = useNavigate();
 
   // Stats for summary cards
   const stats = {
@@ -300,8 +302,12 @@ export default function Dashboard() {
           {sidebarItems.map((item) => (
             <a
               key={item.id}
-              href="#"
-              onClick={(e) => { e.preventDefault(); setActiveTab(item.id); }}
+              href={`/${item.id}`}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                navigate(`/${item.id}`);
+                setActiveTab(item.id); 
+              }}
               className={`
                 flex items-center py-3 px-4 rounded-xl mb-2 
                 transition-all duration-200 group
