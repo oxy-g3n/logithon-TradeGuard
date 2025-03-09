@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { addConsignment } from '../utils/api';
 
 interface ShipmentFormData {
   // Exporter & Consignee Details
@@ -16,13 +17,6 @@ interface ShipmentFormData {
   // Shipment Information
   shipmentId: string;
   shipmentDate: string;
-  packageCount: number;
-  weight: number;
-  dimensions: {
-    length: number;
-    width: number;
-    height: number;
-  };
   declaredValue: number;
   currency: string;
   originCountry: string;
@@ -33,6 +27,8 @@ interface ShipmentFormData {
   hsCode: string;
   quantity: number;
   itemWeight: number;
+  packageCount: number;
+  weight: number;
   packagingType: string;
   handlingInstructions: string;
   mainCategory: string;
@@ -66,6 +62,19 @@ const generateShipmentId = (originCountry: string, destinationCountry: string, d
   return `${originCountry}-${destinationCountry}-${formattedDate}-${randomNum}`;
 };
 
+// Dummy function to fetch HS code from backend
+const fetchHSCode = async (receiverCountry: string, mainCategory: string, subCategory: string): Promise<string> => {
+  // This is a dummy implementation
+  // In real implementation, this would make an API call to the backend
+  console.log('Fetching HS code for:', { receiverCountry, mainCategory, subCategory });
+  
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // Return a dummy HS code
+  return '8471.30.0000';
+};
+
 export default function ShipmentDetailsPage() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
@@ -82,9 +91,6 @@ export default function ShipmentDetailsPage() {
     logisticsProvider: '',
     shipmentId: '',
     shipmentDate: '',
-    packageCount: 0,
-    weight: 0,
-    dimensions: { length: 0, width: 0, height: 0 },
     declaredValue: 0,
     currency: 'USD',
     originCountry: '',
@@ -93,6 +99,8 @@ export default function ShipmentDetailsPage() {
     hsCode: '',
     quantity: 0,
     itemWeight: 0,
+    packageCount: 0,
+    weight: 0,
     packagingType: '',
     handlingInstructions: '',
     mainCategory: '',
@@ -101,6 +109,8 @@ export default function ShipmentDetailsPage() {
     packingList: null,
     useHsCode: true,
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -161,8 +171,78 @@ export default function ShipmentDetailsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here we would typically validate and submit the data
-    navigate('/compliance-check', { state: { formData } });
+    setIsLoading(true);
+    setError('');
+
+    try {
+      // Create FormData object
+      const submitData = new FormData();
+      
+      // Add all required fields
+      submitData.append('sender_name', formData.exporterName);
+      submitData.append('sender_address', formData.exporterAddress);
+      submitData.append('sender_country', formData.originCountry);
+      submitData.append('sender_mail', formData.exporterEmail);
+      submitData.append('sender_phone', formData.exporterPhone);
+      submitData.append('receiver_name', formData.consigneeName);
+      submitData.append('receiver_address', formData.consigneeAddress);
+      submitData.append('receiver_country', formData.destinationCountry);
+      submitData.append('shipment_id', formData.shipmentId);
+      submitData.append('shipment_date', formData.shipmentDate);
+      submitData.append('PackageQuantity', formData.packageCount.toString());
+      submitData.append('HS_code', formData.hsCode);
+      submitData.append('totalWeight', formData.weight.toString());
+      submitData.append('Item_desc', formData.itemDescription);
+      submitData.append('handling_inst', formData.handlingInstructions);
+
+      // Add commercial invoice file if present
+      if (formData.commercialInvoice) {
+        submitData.append('commercial_invoice', formData.commercialInvoice);
+      }
+
+      // Submit to backend
+      const response = await addConsignment(submitData);
+      
+      if (response.success) {
+        // Navigate to compliance check with the consignment UUID
+        navigate('/active-compliances', { state: { consignmentId: response.uuid } });
+      } else {
+        setError(response.message || 'Failed to add consignment. Please try again.');
+      }
+    } catch (err: any) {
+      setError(err.message || 'An error occurred while submitting the consignment.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFetchHSCode = async () => {
+    if (!formData.destinationCountry || !formData.mainCategory || !formData.subCategory) {
+      setError('Please fill in destination country, main category, and sub category first');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const hsCode = await fetchHSCode(
+        formData.destinationCountry,
+        formData.mainCategory,
+        formData.subCategory
+      );
+      
+      // Update the form data with the fetched HS code and switch to HS code mode
+      setFormData(prev => ({
+        ...prev,
+        hsCode,
+        useHsCode: true
+      }));
+      
+      setError('');
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch HS code');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const steps = [
@@ -461,30 +541,6 @@ export default function ShipmentDetailsPage() {
                       required
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#1E293B]">Number of Packages</label>
-                    <input
-                      type="number"
-                      name="packageCount"
-                      value={formData.packageCount}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                        focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#1E293B]">Total Weight (kg)</label>
-                    <input
-                      type="number"
-                      name="weight"
-                      value={formData.weight}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                        focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                      required
-                    />
-                  </div>
                 </div>
               )}
 
@@ -527,7 +583,56 @@ export default function ShipmentDetailsPage() {
                       />
                     </div>
 
-                    {formData.useHsCode ? (
+                    {!formData.useHsCode ? (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-[#1E293B]">Main Category</label>
+                          <input
+                            type="text"
+                            name="mainCategory"
+                            value={formData.mainCategory}
+                            onChange={handleInputChange}
+                            className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
+                              focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
+                            required={!formData.useHsCode}
+                            placeholder="Enter main category"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-[#1E293B]">Sub Category</label>
+                          <div className="mt-1 flex space-x-2">
+                            <input
+                              type="text"
+                              name="subCategory"
+                              value={formData.subCategory}
+                              onChange={handleInputChange}
+                              className="block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
+                                focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
+                              required={!formData.useHsCode}
+                              placeholder="Enter sub category"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleFetchHSCode}
+                              disabled={isLoading || !formData.destinationCountry || !formData.mainCategory || !formData.subCategory}
+                              className="px-4 py-2 bg-[#1E40AF] text-white text-sm font-medium rounded-lg hover:bg-[#1E293B] 
+                                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1E40AF] shadow-sm
+                                transition-all duration-200 disabled:bg-[#94A3B8] disabled:cursor-not-allowed flex items-center"
+                            >
+                              {isLoading ? (
+                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                              ) : (
+                                <span>Get HS Code</span>
+                              )}
+                            </button>
+                          </div>
+                          {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+                        </div>
+                      </>
+                    ) : (
                       <div>
                         <label className="block text-sm font-medium text-[#1E293B]">HS Code</label>
                         <div className="mt-1 relative">
@@ -549,93 +654,32 @@ export default function ShipmentDetailsPage() {
                         </div>
                         <p className="mt-1 text-sm text-[#64748B]">Enter the Harmonized System (HS) code for your item</p>
                       </div>
-                    ) : (
-                      <>
-                        <div>
-                          <label className="block text-sm font-medium text-[#1E293B]">Main Category</label>
-                          <input
-                            type="text"
-                            name="mainCategory"
-                            value={formData.mainCategory}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                              focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                            required={!formData.useHsCode}
-                            placeholder="Enter main category"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-[#1E293B]">Sub Category</label>
-                          <input
-                            type="text"
-                            name="subCategory"
-                            value={formData.subCategory}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                              focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                            required={!formData.useHsCode}
-                            placeholder="Enter sub category"
-                          />
-                        </div>
-                      </>
                     )}
 
                     <div>
-                      <label className="block text-sm font-medium text-[#1E293B]">Dimensions</label>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div>
-                          <div className="mt-1 relative">
-                            <input
-                              type="number"
-                              name="dimensions.length"
-                              value={formData.dimensions.length}
-                              onChange={handleInputChange}
-                              placeholder="Length"
-                              className="block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                                focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                              required
-                            />
-                            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                              <span className="text-sm text-[#64748B]">cm</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="mt-1 relative">
-                            <input
-                              type="number"
-                              name="dimensions.width"
-                              value={formData.dimensions.width}
-                              onChange={handleInputChange}
-                              placeholder="Width"
-                              className="block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                                focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                              required
-                            />
-                            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                              <span className="text-sm text-[#64748B]">cm</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="mt-1 relative">
-                            <input
-                              type="number"
-                              name="dimensions.height"
-                              value={formData.dimensions.height}
-                              onChange={handleInputChange}
-                              placeholder="Height"
-                              className="block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                                focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                              required
-                            />
-                            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                              <span className="text-sm text-[#64748B]">cm</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="mt-1 text-sm text-[#64748B]">Enter dimensions in centimeters (Length × Width × Height)</p>
+                      <label className="block text-sm font-medium text-[#1E293B]">Number of Packages</label>
+                      <input
+                        type="number"
+                        name="packageCount"
+                        value={formData.packageCount}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
+                          focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E293B]">Total Weight (kg)</label>
+                      <input
+                        type="number"
+                        name="weight"
+                        value={formData.weight}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
+                          focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
+                        required
+                      />
                     </div>
 
                     <div>

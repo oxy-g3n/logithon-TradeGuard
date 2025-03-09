@@ -26,8 +26,8 @@ export default [
     file: "routes/shipment-upload.tsx"
   },
   {
-    path: "/compliance-check",
-    file: "routes/compliance-check.tsx"
+    path: "/active-compliances",
+    file: "routes/active-compliances.tsx"
   },
   {
     path: "/shipment-details",

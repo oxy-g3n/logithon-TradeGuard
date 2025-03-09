@@ -62,10 +62,10 @@ export default function ComplianceCheckPage() {
   // Simulated compliance check
   useEffect(() => {
     const formData = location.state?.formData;
-    if (!formData) {
-      navigate('/shipment-import');
-      return;
-    }
+    // if (!formData) {
+    //   navigate('/shipment-import');
+    //   return;
+    // }
 
     // Simulate API call
     setTimeout(() => {

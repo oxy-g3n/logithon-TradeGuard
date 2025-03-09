@@ -1,0 +1,23 @@
+-- database: d:\shared\SPIT\logithon\The-Hack\TradeGuard-V1\logithon-TradeGuard\backend\TG-back\database\database.db
+
+CREATE TABLE IF NOT EXISTS Consignments (
+    uuid INTEGER PRIMARY KEY AUTOINCREMENT,
+    sender_name TEXT NOT NULL,
+    sender_address TEXT NOT NULL,
+    sender_country TEXT NOT NULL,
+    sender_mail TEXT NOT NULL,
+    sender_phone TEXT NOT NULL,
+    receiver_name TEXT NOT NULL,
+    receiver_address TEXT NOT NULL,
+    receiver_country TEXT NOT NULL,
+    shipment_id TEXT NOT NULL,
+    shipment_date TEXT NOT NULL,
+    PackageQuantity INTEGER NOT NULL,
+    HS_code TEXT NOT NULL,
+    totalWeight REAL NOT NULL,
+    Item_desc TEXT NOT NULL,
+    handling_inst TEXT,
+    commercial_invoice BLOB,  -- For storing PDF as binary data
+    compliant TEXT CHECK(compliant IN ('pending', 'compliant', 'flagged')) DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

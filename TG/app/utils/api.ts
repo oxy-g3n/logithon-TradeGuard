@@ -105,4 +105,32 @@ export function getCurrentUser() {
  */
 export function logoutUser() {
   sessionStorage.removeItem('user');
+}
+
+/**
+ * Add a new consignment
+ */
+export async function addConsignment(formData: FormData) {
+  try {
+    const token = JSON.parse(sessionStorage.getItem('user') || '{}').token;
+    
+    const response = await fetch(`${API_BASE_URL}/consignment/add-consignment`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `${token}`
+      },
+      body: formData
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to add consignment');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Add consignment error:', error);
+    throw error;
+  }
 } 
