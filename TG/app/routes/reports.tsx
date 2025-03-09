@@ -139,8 +139,273 @@ export default function ReportsPage() {
     });
 
   const handleDownloadReport = (report: ComplianceReport) => {
-    // In a real app, this would generate and download a PDF
-    console.log('Downloading report:', report.id);
+    // Create a new window for the report
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Please allow popups to download the report');
+      return;
+    }
+
+    // Generate HTML content
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <title>Compliance Report - ${report.shipmentId}</title>
+        <style>
+          @media print {
+            @page {
+              size: A4;
+              margin: 20mm;
+            }
+            body {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+          }
+          body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #1E293B;
+            margin: 0;
+            padding: 20px;
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #E2E8F0;
+          }
+          .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1E40AF;
+            margin-bottom: 10px;
+          }
+          .report-info {
+            margin-bottom: 30px;
+          }
+          .section {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+          }
+          .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #1E40AF;
+          }
+          .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+          }
+          .item {
+            margin-bottom: 10px;
+          }
+          .label {
+            font-size: 14px;
+            color: #64748B;
+            margin-bottom: 5px;
+          }
+          .value {
+            font-weight: 500;
+          }
+          .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-weight: 500;
+          }
+          .status-compliant {
+            background-color: #DCF7E3;
+            color: #166534;
+          }
+          .status-flagged {
+            background-color: #FEE2E2;
+            color: #991B1B;
+          }
+          .status-pending {
+            background-color: #FEF3C7;
+            color: #92400E;
+          }
+          .issue {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+          }
+          .issue-error {
+            background-color: #FEF2F2;
+            border: 1px solid #FEE2E2;
+          }
+          .issue-warning {
+            background-color: #FFFBEB;
+            border: 1px solid #FEF3C7;
+          }
+          .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #64748B;
+            font-size: 12px;
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+          }
+          .score-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #E2E8F0;
+            border-radius: 4px;
+            overflow: hidden;
+          }
+          .score-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+          }
+          .score-fill-high {
+            background-color: #22C55E;
+          }
+          .score-fill-medium {
+            background-color: #F59E0B;
+          }
+          .score-fill-low {
+            background-color: #EF4444;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="logo">TradeGuard</div>
+          <div>Compliance Report</div>
+        </div>
+
+        <div class="section">
+          <div class="grid">
+            <div class="item">
+              <div class="label">Report ID</div>
+              <div class="value">${report.id}</div>
+            </div>
+            <div class="item">
+              <div class="label">Generated At</div>
+              <div class="value">${formatDate(report.generatedAt)}</div>
+            </div>
+            <div class="item">
+              <div class="label">Shipment ID</div>
+              <div class="value">${report.shipmentId}</div>
+            </div>
+            <div class="item">
+              <div class="label">Status</div>
+              <div class="status status-${report.status.toLowerCase()}">${report.status}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Compliance Overview</div>
+          <div class="grid">
+            <div class="item">
+              <div class="label">Compliance Score</div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="score-bar">
+                  <div class="score-fill ${
+                    report.score >= 90 ? 'score-fill-high' :
+                    report.score >= 70 ? 'score-fill-medium' :
+                    'score-fill-low'
+                  }" style="width: ${report.score}%"></div>
+                </div>
+                <div class="value">${report.score}%</div>
+              </div>
+            </div>
+            <div class="item">
+              <div class="label">Risk Level</div>
+              <div class="status ${
+                report.riskLevel === 'Low' ? 'status-compliant' :
+                report.riskLevel === 'High' ? 'status-flagged' :
+                'status-pending'
+              }">${report.riskLevel} Risk</div>
+            </div>
+            <div class="item">
+              <div class="label">Shipment Type</div>
+              <div class="value">${report.type}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Shipment Details</div>
+          <div class="grid">
+            <div class="item">
+              <div class="label">Origin</div>
+              <div class="value">${report.details.origin}</div>
+            </div>
+            <div class="item">
+              <div class="label">Destination</div>
+              <div class="value">${report.details.destination}</div>
+            </div>
+            <div class="item">
+              <div class="label">HS Code</div>
+              <div class="value">${report.details.hsCode}</div>
+            </div>
+            <div class="item">
+              <div class="label">Description</div>
+              <div class="value">${report.details.itemDescription}</div>
+            </div>
+            <div class="item">
+              <div class="label">Package Count</div>
+              <div class="value">${report.details.packageCount}</div>
+            </div>
+            <div class="item">
+              <div class="label">Total Weight</div>
+              <div class="value">${report.details.totalWeight} kg</div>
+            </div>
+          </div>
+        </div>
+
+        ${report.issues.length > 0 ? `
+          <div class="section">
+            <div class="section-title">Compliance Issues</div>
+            ${report.issues.map(issue => `
+              <div class="issue issue-${issue.type}">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <div style="font-weight: 500; color: ${issue.type === 'error' ? '#991B1B' : '#92400E'}">
+                    ${issue.category}
+                  </div>
+                  <div class="status ${issue.type === 'error' ? 'status-flagged' : 'status-pending'}">
+                    ${issue.type.toUpperCase()}
+                  </div>
+                </div>
+                <div style="margin: 10px 0">${issue.message}</div>
+                <div style="color: #1E40AF">
+                  <strong>Suggestion:</strong> ${issue.suggestion}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        <div class="footer">
+          Generated by TradeGuard Compliance System
+          <br>
+          ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
+        </div>
+
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(() => window.close(), 500);
+          };
+        </script>
+      </body>
+      </html>
+    `;
+
+    // Write the HTML content to the new window
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
   };
 
   const formatDate = (dateString: string) => {
