@@ -133,4 +133,37 @@ export async function addConsignment(formData: FormData) {
     console.error('Add consignment error:', error);
     throw error;
   }
+}
+
+/**
+ * Search for HS Code based on categories and country
+ */
+export async function searchHSCode(data: {
+  main_category: string;
+  sub_category: string;
+  destination_country: string;
+}) {
+  try {
+    const token = JSON.parse(sessionStorage.getItem('user') || '{}').token;
+    
+    const response = await fetch(`${API_BASE_URL}/consignment/search-hs-code`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}`
+      },
+      body: JSON.stringify(data)
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      throw new Error(responseData.error || responseData.message || 'Failed to fetch HS code');
+    }
+    
+    return responseData;
+  } catch (error: any) {
+    console.error('Search HS code error:', error);
+    throw new Error(error.message || 'Failed to fetch HS code');
+  }
 } 

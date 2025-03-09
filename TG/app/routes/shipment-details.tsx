@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addConsignment } from '../utils/api';
+import { addConsignment, searchHSCode } from '../utils/api';
 
 interface ShipmentFormData {
   // Exporter & Consignee Details
@@ -224,20 +224,32 @@ export default function ShipmentDetailsPage() {
 
     try {
       setIsLoading(true);
-      const hsCode = await fetchHSCode(
-        formData.destinationCountry,
-        formData.mainCategory,
-        formData.subCategory
-      );
+      // Get the full country name from the AVAILABLE_COUNTRIES array
+      const destinationCountryName = AVAILABLE_COUNTRIES.find(
+        country => country.code === formData.destinationCountry
+      )?.name;
+
+      if (!destinationCountryName) {
+        setError('Invalid destination country');
+        return;
+      }
+
+      const response = await searchHSCode({
+        main_category: formData.mainCategory,
+        sub_category: formData.subCategory,
+        destination_country: destinationCountryName
+      });
       
-      // Update the form data with the fetched HS code and switch to HS code mode
-      setFormData(prev => ({
-        ...prev,
-        hsCode,
-        useHsCode: true
-      }));
-      
-      setError('');
+      if (response.success && response.result) {
+        setFormData(prev => ({
+          ...prev,
+          hsCode: response.result.HS_code,
+          itemDescription: response.result.description || prev.itemDescription
+        }));
+        setError('');
+      } else {
+        setError(response.message || 'Failed to fetch HS code. Please try again.');
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to fetch HS code');
     } finally {
@@ -547,28 +559,6 @@ export default function ShipmentDetailsPage() {
               {/* Step 3: Product Details */}
               {currentStep === 3 && (
                 <div className="space-y-6">
-                  <div className="flex items-center justify-end space-x-2">
-                    <span className={`text-sm ${formData.useHsCode ? 'text-[#64748B]' : 'text-[#1E293B] font-medium'}`}>
-                      Categories
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, useHsCode: !prev.useHsCode }))}
-                      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#1E40AF] focus:ring-offset-2 ${
-                        formData.useHsCode ? 'bg-[#1E40AF]' : 'bg-[#94A3B8]'
-                      }`}
-                    >
-                      <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                          formData.useHsCode ? 'translate-x-5' : 'translate-x-0'
-                        }`}
-                      />
-                    </button>
-                    <span className={`text-sm ${formData.useHsCode ? 'text-[#1E293B] font-medium' : 'text-[#64748B]'}`}>
-                      HS Code
-                    </span>
-                  </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-[#1E293B]">Item Description</label>
@@ -583,78 +573,74 @@ export default function ShipmentDetailsPage() {
                       />
                     </div>
 
-                    {!formData.useHsCode ? (
-                      <>
-                        <div>
-                          <label className="block text-sm font-medium text-[#1E293B]">Main Category</label>
-                          <input
-                            type="text"
-                            name="mainCategory"
-                            value={formData.mainCategory}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                              focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                            required={!formData.useHsCode}
-                            placeholder="Enter main category"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-[#1E293B]">Sub Category</label>
-                          <div className="mt-1 flex space-x-2">
-                            <input
-                              type="text"
-                              name="subCategory"
-                              value={formData.subCategory}
-                              onChange={handleInputChange}
-                              className="block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                                focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                              required={!formData.useHsCode}
-                              placeholder="Enter sub category"
-                            />
-                            <button
-                              type="button"
-                              onClick={handleFetchHSCode}
-                              disabled={isLoading || !formData.destinationCountry || !formData.mainCategory || !formData.subCategory}
-                              className="px-4 py-2 bg-[#1E40AF] text-white text-sm font-medium rounded-lg hover:bg-[#1E293B] 
-                                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1E40AF] shadow-sm
-                                transition-all duration-200 disabled:bg-[#94A3B8] disabled:cursor-not-allowed flex items-center"
-                            >
-                              {isLoading ? (
-                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                              ) : (
-                                <span>Get HS Code</span>
-                              )}
-                            </button>
-                          </div>
-                          {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
-                        </div>
-                      </>
-                    ) : (
-                      <div>
-                        <label className="block text-sm font-medium text-[#1E293B]">HS Code</label>
-                        <div className="mt-1 relative">
-                          <input
-                            type="text"
-                            name="hsCode"
-                            value={formData.hsCode}
-                            onChange={handleInputChange}
-                            className="block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
-                              focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
-                            required={formData.useHsCode}
-                            placeholder="Enter HS Code"
-                          />
-                          <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                            <svg className="h-5 w-5 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E293B]">Main Category</label>
+                      <input
+                        type="text"
+                        name="mainCategory"
+                        value={formData.mainCategory}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
+                          focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
+                        required
+                        placeholder="Enter main category"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E293B]">Sub Category</label>
+                      <div className="mt-1 flex space-x-2">
+                        <input
+                          type="text"
+                          name="subCategory"
+                          value={formData.subCategory}
+                          onChange={handleInputChange}
+                          className="block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] placeholder-[#94A3B8]
+                            focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20 bg-white"
+                          required
+                          placeholder="Enter sub category"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleFetchHSCode}
+                          disabled={isLoading || !formData.destinationCountry || !formData.mainCategory || !formData.subCategory}
+                          className="px-4 py-2 bg-[#1E40AF] text-white text-sm font-medium rounded-lg hover:bg-[#1E293B] 
+                            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1E40AF] shadow-sm
+                            transition-all duration-200 disabled:bg-[#94A3B8] disabled:cursor-not-allowed flex items-center"
+                        >
+                          {isLoading ? (
+                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                          </div>
-                        </div>
-                        <p className="mt-1 text-sm text-[#64748B]">Enter the Harmonized System (HS) code for your item</p>
+                          ) : (
+                            <span>Get HS Code</span>
+                          )}
+                        </button>
                       </div>
-                    )}
+                      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E293B]">HS Code</label>
+                      <div className="mt-1 relative">
+                        <input
+                          type="text"
+                          name="hsCode"
+                          value={formData.hsCode}
+                          className="block w-full rounded-md border border-[#E2E8F0] py-2 px-3 text-[#1E293B] bg-[#F8FAFC]
+                            focus:border-[#1E40AF] focus:ring focus:ring-[#1E40AF]/20"
+                          readOnly
+                          placeholder="Click 'Get HS Code' to fetch"
+                        />
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                          <svg className="h-5 w-5 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <p className="mt-1 text-sm text-[#64748B]">HS Code will be automatically fetched based on your categories</p>
+                    </div>
 
                     <div>
                       <label className="block text-sm font-medium text-[#1E293B]">Number of Packages</label>
